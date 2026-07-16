@@ -1,0 +1,23 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('payment_methods', function (Blueprint $table) {
+            $table->string('logo')->nullable()->after('config');
+            $table->text('backcode')->nullable()->after('logo');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('payment_methods', function (Blueprint $table) {
+            $table->dropColumn(['logo', 'backcode']);
+        });
+    }
+};

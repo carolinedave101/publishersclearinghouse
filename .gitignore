@@ -1,0 +1,17 @@
+/node_modules
+/vendor
+/pch/storage/app/public
+/pch/storage/framework/cache/data
+/pch/storage/framework/sessions
+/pch/storage/framework/testing
+/pch/storage/framework/views
+/pch/storage/logs
+/pch/.env
+.graphify/
+.DS_Store
+Thumbs.db
+pch-single-deploy-working.zip
+pch_database.sql
+winners.csv
+*.csv
+.env
