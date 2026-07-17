@@ -40,13 +40,23 @@ class WithdrawalResource extends Resource
                         Forms\Components\Select::make('winner_id')
                             ->relationship('winner', 'first_name')
                             ->searchable()
+                            ->options(function (): array {
+                                return Winner::orderBy('is_demo', 'desc')
+                                    ->orderBy('created_at', 'desc')
+                                    ->limit(100)
+                                    ->get()
+                                    ->mapWithKeys(fn (Winner $w) => [
+                                        $w->id => "{$w->first_name} {$w->last_name} ({$w->unique_code})",
+                                    ])->toArray();
+                            })
                             ->getSearchResultsUsing(function (string $search): array {
                                 return Winner::where(function (Builder $q) use ($search) {
                                     $q->where('first_name', 'like', "%{$search}%")
                                       ->orWhere('last_name', 'like', "%{$search}%")
                                       ->orWhere('email', 'like', "%{$search}%")
                                       ->orWhere('unique_code', 'like', "%{$search}%");
-                                })->limit(50)->get()->mapWithKeys(fn (Winner $w) => [
+                                })->orderBy('is_demo', 'desc')->orderBy('created_at', 'desc')
+                                ->limit(50)->get()->mapWithKeys(fn (Winner $w) => [
                                     $w->id => "{$w->first_name} {$w->last_name} ({$w->unique_code})",
                                 ])->toArray();
                             })

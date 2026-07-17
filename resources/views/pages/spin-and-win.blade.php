@@ -370,7 +370,8 @@
             const fullSpins = 360 * 7;
             const maxJitter = Math.max(0, segmentAngle / 2 - 8);
             const jitter = (Math.random() - 0.5) * 2 * maxJitter;
-            const endAngle = currentAngle + fullSpins + alignAngle + jitter;
+            const additionalRotation = fullSpins + ((alignAngle - (currentAngle % 360) + 360) % 360) + jitter;
+            const endAngle = currentAngle + additionalRotation;
             const duration = 5500;
             const startTime = performance.now();
 
