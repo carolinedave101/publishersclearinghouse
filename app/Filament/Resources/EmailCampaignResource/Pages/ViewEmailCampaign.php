@@ -39,12 +39,37 @@ class ViewEmailCampaign extends ViewRecord
                 })
                 ->visible(fn () => $this->campaign->status === 'draft'),
 
+            Actions\Action::make('sendAgain')
+                ->label('Send Again')
+                ->icon('heroicon-o-arrow-path')
+                ->color('warning')
+                ->requiresConfirmation()
+                ->modalHeading('Re-send campaign')
+                ->modalDescription('This will clear all existing recipients and re-send the campaign. Continue?')
+                ->action(function () {
+                    $this->campaign->recipients()->delete();
+                    $this->campaign->update([
+                        'status' => 'sending',
+                        'started_at' => now(),
+                        'sent_count' => 0,
+                        'failed_count' => 0,
+                        'completed_at' => null,
+                    ]);
+                    EmailCampaignResource::resolveRecipients($this->campaign);
+                    DispatchCampaign::dispatch($this->campaign, false);
+                    Notification::make()
+                        ->title('Campaign re-sent')
+                        ->body("Campaign '{$this->campaign->name}' has been re-sent.")
+                        ->success()->send();
+                    $this->redirect(static::getUrl(['record' => $this->campaign]));
+                })
+                ->visible(fn () => in_array($this->campaign->status, ['sent', 'cancelled'])),
+
             Actions\Action::make('sendTest')
                 ->label('Send Test to Demo')
                 ->icon('heroicon-o-beaker')
                 ->color('gray')
                 ->action(function () {
-                    $this->campaign->update(['status' => 'sending']);
                     DispatchCampaign::dispatch($this->campaign, true);
                     Notification::make()
                         ->title('Test dispatched')
@@ -96,8 +121,7 @@ class ViewEmailCampaign extends ViewRecord
             Actions\Action::make('edit')
                 ->label('Edit')
                 ->icon('heroicon-o-pencil')
-                ->url(fn () => EmailCampaignResource::getUrl('edit', ['record' => $this->campaign]))
-                ->visible(fn () => $this->campaign->status === 'draft'),
+                ->url(fn () => EmailCampaignResource::getUrl('edit', ['record' => $this->campaign])),
 
             Actions\Action::make('exportCsv')
                 ->label('Export CSV')

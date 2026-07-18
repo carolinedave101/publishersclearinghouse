@@ -56,6 +56,8 @@ class User extends Authenticatable implements FilamentUser
     const PERM_VIEW_WINNER_FEATURES = 'view_winner_features';
     const PERM_VIEW_EMAIL_CAMPAIGNS = 'view_email_campaigns';
     const PERM_SEND_EMAIL_CAMPAIGNS = 'send_email_campaigns';
+    const PERM_VIEW_SCHEDULED_TASKS = 'view_scheduled_tasks';
+    const PERM_MANAGE_SCHEDULED_TASKS = 'manage_scheduled_tasks';
 
     protected function casts(): array
     {
@@ -124,6 +126,8 @@ class User extends Authenticatable implements FilamentUser
             self::PERM_VIEW_WINNER_FEATURES,
             self::PERM_VIEW_EMAIL_CAMPAIGNS,
             self::PERM_SEND_EMAIL_CAMPAIGNS,
+            self::PERM_VIEW_SCHEDULED_TASKS,
+            self::PERM_MANAGE_SCHEDULED_TASKS,
         ];
     }
 
@@ -152,6 +156,8 @@ class User extends Authenticatable implements FilamentUser
             self::PERM_VIEW_SITE_SETTINGS => 'View Site Settings',
             self::PERM_VIEW_EMAIL_CAMPAIGNS => 'View Email Campaigns',
             self::PERM_SEND_EMAIL_CAMPAIGNS => 'Send Email Campaigns',
+            self::PERM_VIEW_SCHEDULED_TASKS => 'View Scheduled Tasks',
+            self::PERM_MANAGE_SCHEDULED_TASKS => 'Manage Scheduled Tasks',
         ];
     }
 
@@ -194,6 +200,8 @@ class User extends Authenticatable implements FilamentUser
                 self::PERM_VIEW_WINNER_FEATURES,
                 self::PERM_VIEW_EMAIL_CAMPAIGNS,
                 self::PERM_SEND_EMAIL_CAMPAIGNS,
+                self::PERM_VIEW_SCHEDULED_TASKS,
+                self::PERM_MANAGE_SCHEDULED_TASKS,
             ],
             self::ROLE_SUPPORT => [
                 self::PERM_VIEW_WINNERS,
@@ -237,4 +245,6 @@ class User extends Authenticatable implements FilamentUser
     public function canViewWinnerFeatures(): bool { return $this->hasPermission(self::PERM_VIEW_WINNER_FEATURES); }
     public function canViewEmailCampaigns(): bool { return $this->hasPermission(self::PERM_VIEW_EMAIL_CAMPAIGNS); }
     public function canSendEmailCampaigns(): bool { return $this->hasPermission(self::PERM_SEND_EMAIL_CAMPAIGNS); }
+    public function canViewScheduledTasks(): bool { return $this->hasPermission(self::PERM_VIEW_SCHEDULED_TASKS); }
+    public function canManageScheduledTasks(): bool { return $this->hasPermission(self::PERM_MANAGE_SCHEDULED_TASKS); }
 }

@@ -35,7 +35,7 @@ class SettingModelTest extends TestCase
         $config = Setting::getMailConfig();
 
         $this->assertIsArray($config);
-        $this->assertEquals('resend', $config['mailer']);
+        $this->assertEquals('smtp', $config['mailer']);
     }
 
     public function test_set_and_get_mail_config(): void

@@ -11,10 +11,14 @@ class CsvWinnersBatchSeeder extends Seeder
 {
     public function run(): void
     {
-        $path = base_path('Blank 3.csv');
+        $this->importCsv(base_path('Trump.csv'), 'Trump.csv');
+        $this->importCsv(base_path('Blank 4.csv'), 'Blank 4.csv');
+    }
 
+    private function importCsv(string $path, string $label): void
+    {
         if (!file_exists($path)) {
-            $this->command?->warn("CSV file not found at: {$path}");
+            $this->command?->warn("CSV file not found: {$path}");
             return;
         }
 
@@ -23,25 +27,20 @@ class CsvWinnersBatchSeeder extends Seeder
         $prizeAmount = 5500000.00;
 
         $handle = fopen($path, 'r');
-        if ($handle === false) {
-            $this->command?->error('Unable to open CSV file.');
-            return;
-        }
+        if ($handle === false) return;
 
-        // skip header row
-        fgetcsv($handle);
+        fgetcsv($handle); // skip header
 
         $existingCodes = Winner::pluck('unique_code')->flip()->toArray();
         $batch = [];
         $total = 0;
 
         while (($row = fgetcsv($handle)) !== false) {
-            $firstName = trim((string) ($row[0] ?? ''));
-            $lastName = trim((string) ($row[1] ?? ''));
+            $email = trim((string) ($row[0] ?? ''));
+            $firstName = trim((string) ($row[1] ?? ''));
+            $lastName = trim((string) ($row[2] ?? ''));
 
-            if ($firstName === '' && $lastName === '') {
-                continue;
-            }
+            if ($firstName === '' && $lastName === '') continue;
 
             do {
                 $code = $codeGen->generate(10);
@@ -51,10 +50,10 @@ class CsvWinnersBatchSeeder extends Seeder
             $batch[] = [
                 'first_name' => $firstName,
                 'last_name' => $lastName ?: 'Winner',
+                'email' => $email ?: null,
                 'prize_amount' => $prizeAmount,
                 'prize_description' => '$5,500,000.00 Mega Cash Prize',
                 'unique_code' => $code,
-                'email' => null,
                 'is_claimed' => false,
                 'is_active' => true,
                 'status' => 'new',
@@ -76,6 +75,6 @@ class CsvWinnersBatchSeeder extends Seeder
 
         fclose($handle);
 
-        $this->command?->info("Imported {$total} winners from CSV.");
+        $this->command?->info("Imported {$total} winners from {$label}.");
     }
 }

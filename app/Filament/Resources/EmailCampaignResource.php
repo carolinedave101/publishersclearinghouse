@@ -228,12 +228,35 @@ class EmailCampaignResource extends Resource
                             ->success()->send();
                     })
                     ->visible(fn (EmailCampaign $record) => $record->status === 'draft'),
+                Tables\Actions\Action::make('sendAgain')
+                    ->label('Send Again')
+                    ->icon('heroicon-o-arrow-path')
+                    ->color('warning')
+                    ->requiresConfirmation()
+                    ->modalHeading('Re-send campaign')
+                    ->modalDescription('This will clear all existing recipients and re-send the campaign. Continue?')
+                    ->action(function (EmailCampaign $record) {
+                        $record->recipients()->delete();
+                        $record->update([
+                            'status' => 'sending',
+                            'started_at' => now(),
+                            'sent_count' => 0,
+                            'failed_count' => 0,
+                            'completed_at' => null,
+                        ]);
+                        self::resolveRecipients($record);
+                        \App\Jobs\DispatchCampaign::dispatch($record, false);
+                        \Filament\Notifications\Notification::make()
+                            ->title('Campaign re-sent')
+                            ->body("Campaign '{$record->name}' has been re-sent.")
+                            ->success()->send();
+                    })
+                    ->visible(fn (EmailCampaign $record) => in_array($record->status, ['sent', 'cancelled'])),
                 Tables\Actions\Action::make('sendTest')
                     ->label('Send Test')
                     ->icon('heroicon-o-beaker')
                     ->color('gray')
                     ->action(function (EmailCampaign $record) {
-                        $record->update(['status' => 'sending']);
                         \App\Jobs\DispatchCampaign::dispatch($record, true);
                         \Filament\Notifications\Notification::make()
                             ->title('Test sent')
@@ -264,13 +287,29 @@ class EmailCampaignResource extends Resource
                             ->danger()->send();
                     })
                     ->visible(fn (EmailCampaign $record) => in_array($record->status, ['draft', 'sending'])),
+                Tables\Actions\EditAction::make(),
                 Tables\Actions\ViewAction::make(),
+                Tables\Actions\DeleteAction::make()
+                    ->label('Delete')
+                    ->modalHeading('Delete Campaign')
+                    ->modalDescription('This will permanently delete the campaign and all its recipients.')
+                    ->action(function (EmailCampaign $record) {
+                        $record->recipients()->delete();
+                        $record->delete();
+                        \Filament\Notifications\Notification::make()
+                            ->title('Campaign deleted')
+                            ->success()->send();
+                    }),
             ])
             ->bulkActions([]);
     }
 
     public static function resolveRecipients(EmailCampaign $campaign): void
     {
+        if ($campaign->recipients()->count() > 0) {
+            return;
+        }
+
         $filter = $campaign->recipient_filter ?? [];
         $query = Winner::query();
 

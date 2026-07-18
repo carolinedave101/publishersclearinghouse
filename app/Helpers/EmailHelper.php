@@ -10,7 +10,7 @@ class EmailHelper
     public static function send(mixed $mailable, string $to, ?string $name = null): void
     {
         try {
-            Mail::to($to)->queue($mailable);
+            Mail::to($to)->send($mailable);
         } catch (\Exception $e) {
             Log::error('Failed to send email: ' . $e->getMessage());
         }

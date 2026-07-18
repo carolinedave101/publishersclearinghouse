@@ -199,19 +199,24 @@ cd /home/og/Desktop/projects/road/publishersclearinghouse
 npm run build
 
 # 2. Rebuild deploy zip from source
-# The zip mirrors: public/ → zip root, rest of Laravel → pch/ in zip
+# The zip mirrors: public/ assets → zip root, root index.php/.htaccess → zip root,
+# rest of Laravel → pch/ in zip
 TMPDIR=$(mktemp -d)
 ZIP_SRC="$TMPDIR/pch-deploy"
-
-# Copy root-level files (public/ contents + top-level assets)
 mkdir -p "$ZIP_SRC"
-cp -r public/* "$ZIP_SRC/"
-cp public/.htaccess "$ZIP_SRC/" 2>/dev/null
-cp favicon.png logo.png "$ZIP_SRC/" 2>/dev/null
-cp Trump.csv "Blank 4.csv" winners.csv "$ZIP_SRC/" 2>/dev/null
 
-# Copy CSS/JS (Filament assets served at /css/* and /js/*)
-cp -r css/ js/ "$ZIP_SRC/" 2>/dev/null
+# Copy root-level front controller and htaccess (cPanel entry point)
+cp index.php "$ZIP_SRC/"
+cp .htaccess "$ZIP_SRC/" 2>/dev/null
+
+# Copy public assets: CSS, JS, build, images, shop assets
+cp -r public/css public/js public/build public/shop-assets "$ZIP_SRC/" 2>/dev/null
+cp public/favicon.png public/logo.png "$ZIP_SRC/" 2>/dev/null
+
+# Copy CSV / SQL dump / instructions
+cp Trump.csv "Blank 4.csv" winners.csv "$ZIP_SRC/" 2>/dev/null
+cp pch_database.sql "$ZIP_SRC/"
+cp INSTRUCTIONS.txt "$ZIP_SRC/" 2>/dev/null || true
 
 # Copy the Laravel app into pch/ subdirectory
 cp -r app bootstrap config database resources routes storage tests vendor \
@@ -220,12 +225,6 @@ cp -r app bootstrap config database resources routes storage tests vendor \
 
 # Copy .env (safe default — user edits per-deploy)
 cp .env.example "$ZIP_SRC/pch/.env" 2>/dev/null
-
-# Copy SQL dump
-cp pch_database.sql "$ZIP_SRC/"
-
-# Copy other root assets
-cp INSTRUCTIONS.txt "$ZIP_SRC/" 2>/dev/null || true
 
 # Build the zip
 (cd "$TMPDIR" && zip -r pch-single-deploy-working.zip pch-deploy/)

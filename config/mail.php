@@ -6,14 +6,24 @@ return [
         'resend' => [
             'transport' => 'resend',
         ],
-        'smtp' => [
+        'smtp_tls' => [
             'transport' => 'smtp',
-            'host' => env('MAIL_HOST', 'smtp.mailgun.org'),
-            'port' => env('MAIL_PORT', 587),
-            'encryption' => env('MAIL_ENCRYPTION', 'tls'),
+            'host' => env('MAIL_HOST', 'smtp.stackmail.com'),
+            'port' => 587,
+            'encryption' => 'tls',
             'username' => env('MAIL_USERNAME'),
             'password' => env('MAIL_PASSWORD'),
-            'timeout' => null,
+            'timeout' => 10,
+            'local_domain' => env('MAIL_EHLO_DOMAIN'),
+        ],
+        'smtp_ssl' => [
+            'transport' => 'smtp',
+            'host' => env('MAIL_HOST', 'smtp.stackmail.com'),
+            'port' => 465,
+            'encryption' => 'ssl',
+            'username' => env('MAIL_USERNAME'),
+            'password' => env('MAIL_PASSWORD'),
+            'timeout' => 10,
             'local_domain' => env('MAIL_EHLO_DOMAIN'),
         ],
         'log' => [
@@ -25,7 +35,7 @@ return [
         ],
         'failover' => [
             'transport' => 'failover',
-            'mailers' => ['smtp', 'log'],
+            'mailers' => ['smtp_ssl', 'smtp_tls', 'log'],
         ],
     ],
     'from' => [

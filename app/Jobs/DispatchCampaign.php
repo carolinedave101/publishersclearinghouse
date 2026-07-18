@@ -118,6 +118,11 @@ class DispatchCampaign implements ShouldQueue
 
     protected function sendTest(): void
     {
+        if ($this->campaign->recipients()->count() > 0) {
+            Log::info("Test campaign [{$this->campaign->id}]: already dispatched, skipping.");
+            return;
+        }
+
         $demoWinners = Winner::where('is_demo', true)->get();
 
         if ($demoWinners->isEmpty()) {

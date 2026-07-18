@@ -47,8 +47,10 @@ class WinnerDashboardController extends Controller
             'code' => ['required', 'string'],
         ]);
 
+        $code = substr(strtoupper(preg_replace('/[^A-Z0-9]/', '', trim($data['code']))), 0, 10);
+
         $winner = Winner::active()
-            ->where('unique_code', strtoupper($data['code']))
+            ->where('unique_code', $code)
             ->first();
 
         if (!$winner) {

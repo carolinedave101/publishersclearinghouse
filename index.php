@@ -1,10 +1,11 @@
 <?php
 
-use Illuminate\Http\Request;
-
 define('LARAVEL_START', microtime(true));
 
-$envFile = __DIR__.'/../.env';
+// Auto-generate APP_KEY if none is set and persist it to .env immediately,
+// so the key is stable across requests (avoids CSRF / session issues
+// from a per-request temp key).
+$envFile = __DIR__.'/pch/.env';
 if (file_exists($envFile)) {
     $envContents = file_get_contents($envFile);
     if (!preg_match('/^APP_KEY=[a-zA-Z0-9+=\/:]+/m', $envContents)) {
@@ -16,18 +17,18 @@ if (file_exists($envFile)) {
     }
 }
 
-if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php')) {
+if (file_exists($maintenance = __DIR__.'/pch/storage/framework/maintenance.php')) {
     require $maintenance;
 }
 
-require __DIR__.'/../vendor/autoload.php';
+require __DIR__.'/pch/vendor/autoload.php';
 
-$app = require_once __DIR__.'/../bootstrap/app.php';
+$app = require_once __DIR__.'/pch/bootstrap/app.php';
 
 $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
 
 $response = $kernel->handle(
-    $request = Request::capture()
+    $request = Illuminate\Http\Request::capture()
 )->send();
 
 $kernel->terminate($request, $response);

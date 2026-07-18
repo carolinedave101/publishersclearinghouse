@@ -1,0 +1,124 @@
+═══════════════════════════════════════════════════════════════
+  PCH WINNERS PORTAL — cPanel Deployment Guide
+  Zero terminal commands required
+═══════════════════════════════════════════════════════════════
+
+PREREQUISITES
+━━━━━━━━━━━━━
+• cPanel access with phpMyAdmin
+• MySQL 5.7+ or MariaDB 10.3+
+• PHP 8.1+
+• A domain (e.g., winners.yourdomain.com)
+
+STEP 1: UPLOAD & EXTRACT
+━━━━━━━━━━━━━━━━━━━━━━━━
+1. In cPanel → File Manager, navigate to the document root
+   you want to use (e.g., public_html/ or a subfolder like
+   winners.yourdomain.com/).
+2. Upload pch-single-deploy-working.zip
+3. Extract the zip — you should see:
+   ├── index.php          ← front controller
+   ├── .htaccess          ← rewrite rules
+   ├── pch/               ← Laravel application
+   ├── css/               ← admin styles
+   ├── js/                ← admin scripts
+   ├── build/             ← compiled assets
+   ├── shop-assets/       ← product images
+   ├── pch_database.sql   ← complete database dump
+   ├── winners.csv        ← exported winner list
+   ├── Trump.csv          ← source winners data
+   ├── Blank 4.csv        ← source winners data
+   └── logo.png / favicon.png
+
+IMPORTANT: Your document root MUST contain index.php directly.
+           Do NOT point the document root to the pch/ folder.
+
+STEP 2: CREATE DATABASE
+━━━━━━━━━━━━━━━━━━━━━━
+1. In cPanel → MySQL Databases, create a new database and user.
+   Grant ALL PRIVILEGES to the user.
+2. Open phpMyAdmin, select your new database.
+3. Click Import → Choose File → select pch_database.sql → Go.
+   (This creates 27 tables and inserts 11,025 winners.)
+
+STEP 3: CONFIGURE .ENV
+━━━━━━━━━━━━━━━━━━━━━━
+1. In File Manager, go to pch/ and edit .env
+2. Change these values:
+
+   APP_URL=https://yourdomain.com    ← your actual domain
+
+   DB_DATABASE=your_database_name
+   DB_USERNAME=your_database_user
+   DB_PASSWORD=your_database_password
+
+   MAIL_USERNAME=your-smtp-email
+   MAIL_PASSWORD=your-smtp-password
+   MAIL_FROM_ADDRESS=your-smtp-email
+   MAIL_FROM_NAME="Your Company Name"
+
+   SETUP_TOKEN=your-secret-token    ← choose a strong token
+
+   Leave everything else at defaults.
+
+STEP 4: SET PERMISSIONS
+━━━━━━━━━━━━━━━━━━━━━━
+In File Manager, right-click each folder → Change Permissions:
+
+   pch/storage/           → 755 (or 777 if needed)
+   pch/bootstrap/cache/   → 755
+
+Check the box "Change permissions for all subdirectories/files".
+
+STEP 5: RUN SETUP
+━━━━━━━━━━━━━━━━
+Visit in your browser:
+   https://yourdomain.com/setup?token=your-secret-token
+
+You should see a JSON response with all steps marked "ok":
+   • App key generated
+   • Database connected
+   • Migrations run
+   • Storage symlink created
+   • All storage paths writable
+   • Mail configuration saved
+
+If any step shows "error", fix the issue and re-visit the URL.
+
+STEP 6: LOG IN
+━━━━━━━━━━━━━━
+Visit https://yourdomain.com/admin
+   Email:    admin@pch.com
+   Password: password
+
+STEP 7: SET UP CRON JOBS (for email campaigns)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+cPanel does not provide terminal access, but you can use
+cron-job.org (free) to call the cron endpoint:
+
+1. Go to https://cron-job.org and sign up
+2. Create a cron job:
+   - URL: https://yourdomain.com/cron/trigger?token=YOUR_TOKEN
+   - Schedule: Every 1 minute
+   - (Your cron token is shown in the Cron Manager admin page)
+
+Alternatively, use cPanel's Cron Jobs feature:
+1. In cPanel → Cron Jobs
+2. Set: curl --silent https://yourdomain.com/cron/trigger?token=YOUR_TOKEN
+3. Schedule: * * * * * (every minute)
+
+TROUBLESHOOTING
+━━━━━━━━━━━━━━━
+• Blank page: Check pch/storage/logs/laravel.log for errors
+• "No application key": Visit /setup?token=... to generate the key
+• Storage uploads not showing: The storage symlink is created
+  automatically on first request. If it fails, the system falls
+  back to copying the directory.
+• 500 Internal Server Error: Ensure PHP version is 8.1+
+  In cPanel → Select PHP Version, set to "php 8.1" or higher.
+• "Class not found": The vendor directory is pre-built. If
+  files are missing, re-upload the zip.
+• Mail not sending: Check SMTP credentials in .env. The system
+  uses port 465 with SSL encryption for Stackmail.
+• Queue jobs not processed: Set up the cron job (Step 7) to
+  trigger the queue worker every minute.

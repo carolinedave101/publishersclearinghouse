@@ -11,11 +11,6 @@ class CampaignStatsWidget extends Widget
 
     public ?EmailCampaign $campaign = null;
 
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
     protected function getViewData(): array
     {
         if (!$this->campaign) {

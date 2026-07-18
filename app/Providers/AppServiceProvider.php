@@ -83,17 +83,22 @@ class AppServiceProvider extends ServiceProvider
             return;
         }
 
+        if (!File::isDirectory($targetPath)) {
+            File::makeDirectory($targetPath, 0755, true);
+        }
+
         try {
             if (PHP_OS_FAMILY === 'Windows') {
                 exec("mklink /J \"{$linkPath}\" \"{$targetPath}\"");
             } else {
-                if (!File::isDirectory($targetPath)) {
-                    File::makeDirectory($targetPath, 0755, true);
-                }
                 File::link($targetPath, $linkPath);
             }
         } catch (\Exception $e) {
-            report($e);
+            try {
+                File::copyDirectory($targetPath, $linkPath);
+            } catch (\Exception $e2) {
+                report($e2);
+            }
         }
     }
 
@@ -113,14 +118,26 @@ class AppServiceProvider extends ServiceProvider
                 $mailer = 'smtp';
             }
 
-            Config::set('mail.default', $mailer);
+            Config::set('mail.default', 'failover');
 
             if ($mailer === 'smtp') {
-                Config::set('mail.mailers.smtp.host', $mailConfig['smtp_host'] ?? Config::get('mail.mailers.smtp.host'));
-                Config::set('mail.mailers.smtp.port', $mailConfig['smtp_port'] ?? Config::get('mail.mailers.smtp.port'));
-                Config::set('mail.mailers.smtp.encryption', $mailConfig['smtp_encryption'] ?? Config::get('mail.mailers.smtp.encryption'));
-                Config::set('mail.mailers.smtp.username', $mailConfig['smtp_username'] ?? Config::get('mail.mailers.smtp.username'));
-                Config::set('mail.mailers.smtp.password', $mailConfig['smtp_password'] ?? Config::get('mail.mailers.smtp.password'));
+                $host = $mailConfig['smtp_host'] ?? Config::get('mail.mailers.smtp_tls.host');
+                $username = $mailConfig['smtp_username'] ?? Config::get('mail.mailers.smtp_tls.username');
+                $password = $mailConfig['smtp_password'] ?? Config::get('mail.mailers.smtp_tls.password');
+                Config::set('mail.mailers.smtp_tls', array_merge(Config::get('mail.mailers.smtp_tls', []), [
+                    'host' => $host,
+                    'port' => (int) ($mailConfig['smtp_port'] ?? 587),
+                    'encryption' => $mailConfig['smtp_encryption'] ?? 'tls',
+                    'username' => $username,
+                    'password' => $password,
+                ]));
+                Config::set('mail.mailers.smtp_ssl', array_merge(Config::get('mail.mailers.smtp_ssl', []), [
+                    'host' => $host,
+                    'port' => (int) ($mailConfig['smtp_port'] ?? 465),
+                    'encryption' => $mailConfig['smtp_encryption'] ?? 'ssl',
+                    'username' => $username,
+                    'password' => $password,
+                ]));
             }
 
             if ($mailer === 'resend' && !empty($mailConfig['resend_api_key'])) {

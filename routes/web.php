@@ -6,6 +6,7 @@ use App\Http\Controllers\Web\GiveawayController;
 use App\Http\Controllers\Web\HomeController;
 use App\Http\Controllers\Web\MembershipController;
 use App\Http\Controllers\Web\ProfileController;
+use App\Http\Controllers\Web\CronTriggerController;
 use App\Http\Controllers\Web\SetupController;
 use App\Http\Controllers\Web\ShopController;
 use App\Http\Controllers\Web\SpinAndWinController;
@@ -63,6 +64,8 @@ Route::post('/shop/order', [ShopController::class, 'placeOrder'])->name('shop.or
 
 Route::get('/memberships', [MembershipController::class, 'index'])->name('memberships');
 Route::post('/memberships/signup', [MembershipController::class, 'signup'])->name('memberships.signup');
+
+Route::get('/cron/trigger', [CronTriggerController::class, 'trigger'])->name('cron.trigger');
 
 Route::get('/winners/recent', [HomeController::class, 'recentWinners'])->name('winners.recent');
 Route::get('/winners/stats', [HomeController::class, 'stats'])->name('winners.stats');

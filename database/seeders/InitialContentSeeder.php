@@ -8,9 +8,11 @@ use App\Models\SpinAndWin;
 use App\Models\SpinWheelSegment;
 use App\Models\ShopProduct;
 use App\Models\Page;
+use App\Models\ScheduledTask;
 use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class InitialContentSeeder extends Seeder
 {
@@ -233,6 +235,14 @@ class InitialContentSeeder extends Seeder
             ['key' => 'contact_email', 'value' => 'support@pch.com', 'created_at' => now(), 'updated_at' => now()],
             ['key' => 'hero_title', 'value' => 'Could You Be Our Next Winner?', 'created_at' => now(), 'updated_at' => now()],
             ['key' => 'hero_subtitle', 'value' => 'Enter your unique winner code below to claim your prize!', 'created_at' => now(), 'updated_at' => now()],
+            ['key' => 'cron_trigger_token', 'value' => Str::random(32), 'created_at' => now(), 'updated_at' => now()],
+        ]);
+
+        ScheduledTask::create([
+            'command' => 'queue:work database --stop-when-empty --max-time=55',
+            'description' => 'Queue Worker',
+            'frequency' => 'everyMinute',
+            'is_enabled' => true,
         ]);
     }
 }
