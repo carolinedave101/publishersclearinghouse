@@ -62,7 +62,7 @@ class WinnersRelationManager extends RelationManager
             ->actions([
                 Tables\Actions\Action::make('view')
                     ->label('View Winner')
-                    ->url(fn ($record) => \App\Filament\Resources\WinnerResource::getUrl('view', ['record' => $record]))
+                    ->url(fn ($record) => \App\Filament\Resources\WinnerResource::getUrl('edit', ['record' => $record]))
                     ->icon('heroicon-o-arrow-top-right-on-square'),
             ]);
     }

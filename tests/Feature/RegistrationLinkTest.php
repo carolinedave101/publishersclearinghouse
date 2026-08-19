@@ -95,4 +95,20 @@ class RegistrationLinkTest extends TestCase
 
         RegistrationLink::factory()->create(['source' => 'facebook-june']);
     }
+
+    public function test_registration_link_view_page_renders_with_winners(): void
+    {
+        $link = RegistrationLink::factory()->create(['source' => 'facebook-june']);
+        Winner::factory()->create([
+            'registration_link_id' => $link->id,
+            'source' => 'facebook-june',
+        ]);
+
+        $admin = \App\Models\User::factory()->create(['is_super_admin' => true, 'is_admin' => true]);
+
+        $this->actingAs($admin)
+            ->get(\App\Filament\Resources\RegistrationLinkResource::getUrl('view', ['record' => $link]))
+            ->assertOk()
+            ->assertSee('facebook-june');
+    }
 }
