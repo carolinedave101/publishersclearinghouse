@@ -13,6 +13,9 @@
                 <p class="text-gray-500 text-xs">Found in your winner notification email</p>
             </div>
         </div>
+        <a href="{{ route('register') }}" class="block text-center text-xs text-[#1B2A4A]/50 mb-4 hover:text-[#D4AF37] transition-colors">
+            Don't have a winner code? <span class="text-[#D4AF37] font-semibold">Register now</span>
+        </a>
         <form action="{{ route('winner.lookup') }}" method="POST" class="space-y-4">
             @csrf
             <div>

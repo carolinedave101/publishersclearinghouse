@@ -22,6 +22,7 @@ use App\Notifications\WinnerClaimedNotification;
 use App\Services\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -55,6 +56,26 @@ class WinnerDashboardController extends Controller
 
         if (!$winner) {
             return redirect()->back()->with('error', 'Invalid winner code. Please check and try again.');
+        }
+
+        session(['winner_id' => $winner->id]);
+
+        return redirect()->route('winner.dashboard');
+    }
+
+    public function loginWithPassword(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'email' => ['required', 'string', 'email'],
+            'password' => ['required', 'string'],
+        ]);
+
+        $winner = Winner::active()
+            ->where('email', strtolower(trim($data['email'])))
+            ->first();
+
+        if (!$winner || !$winner->password || !Hash::check($data['password'], $winner->password)) {
+            return redirect()->back()->with('error', 'Invalid email or password. Please try again.');
         }
 
         session(['winner_id' => $winner->id]);

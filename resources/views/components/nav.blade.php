@@ -58,6 +58,9 @@
                         </div>
                     </div>
                 @else
+                    <a href="{{ route('register') }}" class="px-4 py-2 text-white/80 hover:text-[#D4AF37] rounded-lg text-sm font-semibold transition-colors hidden sm:inline-block">
+                        Register
+                    </a>
                     <a href="{{ route('login') }}" class="px-5 py-2 bg-gradient-to-r from-[#D4AF37] to-[#B8960F] text-[#1B2A4A] rounded-lg text-sm font-bold hover:from-[#C5A55A] hover:to-[#A8850D] transition-all shadow-lg shadow-[#D4AF37]/20">
                         Login with Code
                     </a>
@@ -85,6 +88,7 @@
                         <button type="submit" class="text-sm text-red-300 hover:text-red-200 py-1 text-left">🚪 Sign Out</button>
                     </form>
                 @else
+                    <a href="{{ route('register') }}" class="text-sm text-white/80 hover:text-[#D4AF37] py-1">Register</a>
                     <a href="{{ route('login') }}" class="text-sm bg-gradient-to-r from-[#D4AF37] to-[#B8960F] text-[#1B2A4A] font-bold py-2 px-4 rounded-lg text-center">Login with Code</a>
                 @endif
             </div>

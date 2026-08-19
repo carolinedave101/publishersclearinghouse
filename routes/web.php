@@ -6,12 +6,14 @@ use App\Http\Controllers\Web\GiveawayController;
 use App\Http\Controllers\Web\HomeController;
 use App\Http\Controllers\Web\MembershipController;
 use App\Http\Controllers\Web\ProfileController;
+use App\Http\Controllers\Web\CampaignCronController;
 use App\Http\Controllers\Web\CronTriggerController;
 use App\Http\Controllers\Web\SetupController;
 use App\Http\Controllers\Web\ShopController;
 use App\Http\Controllers\Web\SpinAndWinController;
 use App\Http\Controllers\Web\UserMessageController;
 use App\Http\Controllers\Web\WinnerDashboardController;
+use App\Http\Controllers\Web\WinnerRegistrationController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/setup', [SetupController::class, 'index'])->name('setup');
@@ -21,11 +23,12 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/login', [WinnerDashboardController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.attempt');
 Route::post('/winner/lookup', [WinnerDashboardController::class, 'lookup'])->name('winner.lookup');
+Route::post('/winner/login', [WinnerDashboardController::class, 'loginWithPassword'])->name('winner.login.password');
 Route::post('/winner/claim', [WinnerDashboardController::class, 'claim'])->name('winner.claim');
 
 Route::middleware('guest')->group(function () {
-    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-    Route::post('/register', [AuthController::class, 'register']);
+    Route::get('/register', [WinnerRegistrationController::class, 'showRegister'])->name('register');
+    Route::post('/register', [WinnerRegistrationController::class, 'store']);
 });
 
 Route::middleware('winner.auth')->group(function () {
@@ -66,6 +69,7 @@ Route::get('/memberships', [MembershipController::class, 'index'])->name('member
 Route::post('/memberships/signup', [MembershipController::class, 'signup'])->name('memberships.signup');
 
 Route::get('/cron/trigger', [CronTriggerController::class, 'trigger'])->name('cron.trigger');
+Route::get('/cron/send-campaign', [CampaignCronController::class, 'handle'])->name('cron.send-campaign');
 
 Route::get('/winners/recent', [HomeController::class, 'recentWinners'])->name('winners.recent');
 Route::get('/winners/stats', [HomeController::class, 'stats'])->name('winners.stats');

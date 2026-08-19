@@ -30,6 +30,8 @@ class Winner extends Model
         'prize_amount',
         'prize_description',
         'email',
+        'source',
+        'password',
         'unique_code',
         'is_claimed',
         'claimed_at',
@@ -52,6 +54,7 @@ class Winner extends Model
             'date_of_birth' => 'date',
             'features' => 'array',
             'demographics' => 'array',
+            'password' => 'hashed',
         ];
     }
 

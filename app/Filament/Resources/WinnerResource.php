@@ -178,6 +178,11 @@ class WinnerResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('source')
+                    ->label('Source')
+                    ->badge()
+                    ->color('gray')
+                    ->placeholder('—'),
                 Tables\Columns\TextColumn::make('unique_code')
                     ->searchable()
                     ->copyable()
