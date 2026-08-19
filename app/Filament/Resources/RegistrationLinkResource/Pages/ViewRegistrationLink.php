@@ -13,6 +13,19 @@ class ViewRegistrationLink extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('exportCsv')
+                ->label('Export CSV')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('gray')
+                ->action(function () {
+                    $csv = $this->record->exportWinnersCsv();
+
+                    return response()->streamDownload(
+                        fn () => print($csv),
+                        "registration-link-{$this->record->id}-winners.csv",
+                        ['Content-Type' => 'text/csv']
+                    );
+                }),
             Actions\Action::make('copy_link')
                 ->label('Copy Registration Link')
                 ->icon('heroicon-o-clipboard-document')
