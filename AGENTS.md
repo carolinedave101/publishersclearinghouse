@@ -124,7 +124,7 @@ The root‑level `storage` symlink is **not included** in the zip — `AppServic
 - 10,000 production recipients queued, 10 test emails delivered successfully
 
 ## Next Steps
-1. **Optional enhancement (suggested, not approved):** add a `SelectFilter` on `source` to the Winners admin table (currently only badge + search). User asked how to differentiate FB/TikTok links; answered with `?source=facebook` / `?source=tiktok` (any `[A-Za-z0-9_-]` value, e.g. `facebook-june`)
+1. **Optional enhancement (suggested, not approved):** add a `SelectFilter` on `source` to the Winners admin table (currently badge + "Link" filter + search). User asked how to differentiate FB/TikTok links; answered with `?source=facebook` / `?source=tiktok` (any `[A-Za-z0-9_-]` value, e.g. `facebook-june`)
 2. Upload `pch-single-deploy-working.zip` to cPanel, extract (overwrite)
 2. Import `pch_database.sql` via phpMyAdmin (overwrite existing DB)
 3. Set `pch/storage` and `pch/bootstrap/cache` to 755
@@ -184,6 +184,17 @@ The root‑level `storage` symlink is **not included** in the zip — `AppServic
 - Migration: `2026_08_19_110000_add_password_to_winners_table` (nullable, after email)
 - Test: `tests/Feature/WinnerPasswordLoginTest.php` (6 tests); full suite 200 passing
 - Production test winner: `Pass Test` / pw.test.2026@gmail.com / code `4CEDPLXQML` / pw `super-secret-99` (delete from admin if unwanted)
+
+### Registration Links (Session 2026-08-19)
+- Admin creates **registration links** (Portal → Registration Links): name + unique lowercase `source` key + active toggle; table shows copyable full URL, registrations count badge, created date; view page lists winners registered via that link (WinnersRelationManager)
+- New table `registration_links` (id, name, source UNIQUE, is_active) + nullable `registration_link_id` FK on `winners` — migration `2026_08_19_120000_create_registration_links_table`
+- `WinnerRegistrationController::store()` matches `?source=` to an ACTIVE link → sets `registration_link_id` (unknown/inactive source → winner still registers, untagged)
+- **24 permission constants** — added `view_registration_links` (24th) with `canViewRegistrationLinks()`; granted to super admin/admin/manager + label + CheckboxList
+- Winners admin table: new "Link" column (badge) + `registration_link_id` SelectFilter
+- Promo banner on `/register` header: "Register to stand a chance to win a $10,000 to $8,500,000 prize award" (static text)
+- Test: `tests/Feature/RegistrationLinkTest.php` (6 tests; duplicate source enforced by DB unique index — Filament is Livewire, plain HTTP POSTs can't be validation-tested)
+- Production test data: link `Facebook June Campaign` (source `facebook-june`) + winner `Linky Testy` / linky.testy.2026@gmail.com / code `DRPNZTW3GR` tagged to it (delete from admin if unwanted)
+- **Server quirk discovered:** API2 `Fileman::fileop op=mkdir` returns OK but creates NOTHING (like UAPI delete/search). To create dirs: upload a temp PHP tool into `public/` (NOT root — root `.htaccess` rewrites everything to `public/`) that bootstraps the Laravel app (`require vendor/autoload.php` + `bootstrap/app.php` from docroot root, NOT `pch/` — the app lives at root) and calls `mkdir()`; hit it via `https://domain/public/tool.php`, then delete via API2 fileop unlink
 
 ### cPanel File Manager API Deployment (replaces SFTP — SFTP password auth is rejected)
 - UAPI `Fileman/save_file_content` works for uploads, BUT **the `base64=1` param is IGNORED — send PLAIN file content** (`--data-urlencode "content@file"`). Sending base64 text corrupts the file (whole site served raw base64 as static text — exactly what happened on 2026-08-19)

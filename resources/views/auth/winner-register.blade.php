@@ -6,6 +6,10 @@
 @include('components.nav')
 <div class="min-h-[calc(100vh-8rem)] flex items-center justify-center bg-gradient-to-br from-[#FFFBF0] to-[#F5F0E0] px-4 py-12">
     <div class="w-full max-w-lg">
+        <div class="bg-gradient-to-r from-[#1B2A4A] via-[#2C3E6B] to-[#1B2A4A] border-2 border-[#D4AF37] rounded-2xl p-5 mb-6 text-center shadow-xl shadow-[#D4AF37]/20">
+            <p class="text-[#D4AF37] text-sm font-semibold uppercase tracking-widest mb-1">Publishers Clearing House</p>
+            <h2 class="text-white text-xl md:text-2xl font-bold leading-snug">Register to stand a chance to win a <span class="text-[#D4AF37]">$10,000</span> to <span class="text-[#D4AF37]">$8,500,000</span> prize award</h2>
+        </div>
         <div class="bg-white rounded-2xl shadow-xl shadow-[#D4AF37]/10 border border-[#D4AF37]/20 p-8">
             <div class="text-center mb-8">
                 <div class="text-5xl mb-4">🏆</div>

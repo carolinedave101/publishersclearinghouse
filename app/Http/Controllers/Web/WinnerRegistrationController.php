@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Web;
 use App\Helpers\EmailHelper;
 use App\Http\Controllers\Controller;
 use App\Mail\WinnerNotification;
+use App\Models\RegistrationLink;
 use App\Models\Winner;
 use App\Services\CodeGenerator;
 use Illuminate\Http\RedirectResponse;
@@ -47,6 +48,11 @@ class WinnerRegistrationController extends Controller
             ''
         );
 
+        $link = RegistrationLink::query()
+            ->where('is_active', true)
+            ->where('source', $source)
+            ->first();
+
         $winner = Winner::create([
             'first_name' => $data['first_name'],
             'last_name' => $data['last_name'],
@@ -63,6 +69,7 @@ class WinnerRegistrationController extends Controller
             'is_active' => true,
             'is_claimed' => false,
             'source' => $source ?: null,
+            'registration_link_id' => $link?->id,
         ]);
 
         session(['winner_id' => $winner->id]);

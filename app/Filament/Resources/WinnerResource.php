@@ -183,6 +183,11 @@ class WinnerResource extends Resource
                     ->badge()
                     ->color('gray')
                     ->placeholder('—'),
+                Tables\Columns\TextColumn::make('registrationLink.name')
+                    ->label('Link')
+                    ->badge()
+                    ->color('info')
+                    ->placeholder('—'),
                 Tables\Columns\TextColumn::make('unique_code')
                     ->searchable()
                     ->copyable()
@@ -235,6 +240,9 @@ class WinnerResource extends Resource
                     ->dateTime(),
             ])
             ->filters([
+                SelectFilter::make('registration_link_id')
+                    ->label('Registration Link')
+                    ->relationship('registrationLink', 'name'),
                 SelectFilter::make('status')
                     ->options([
                         'new' => 'New',

@@ -10,6 +10,7 @@ use App\Mail\WinnerNotification;
 use App\Models\EmailCampaignRecipient;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
 
@@ -31,6 +32,7 @@ class Winner extends Model
         'prize_description',
         'email',
         'source',
+        'registration_link_id',
         'password',
         'unique_code',
         'is_claimed',
@@ -61,6 +63,11 @@ class Winner extends Model
     public function routeNotificationForMail(): ?string
     {
         return $this->email;
+    }
+
+    public function registrationLink(): BelongsTo
+    {
+        return $this->belongsTo(RegistrationLink::class);
     }
 
     public function messages()
